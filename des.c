@@ -13,22 +13,30 @@ void pc1(char *key64, char *key56);
 
 char get_hex_single(char *half_byte);
 char* get_half_byte(char hex);
+void splitkey(char *key_b, char *key_left, char *key_right, int key_size);
+void shift_block(char *to_shift, char *reference, int size);
 
+struct ShiftStep {
+	int l_block[28];
+	int r_block[28];
+};
+
+typedef struct {
+	struct ShiftStep round_n[16];
+	int shift_n[16];
+} ShiftStructure;
 
 int main()
 {
-	unsigned char text[8];
-	unsigned char key[8];
-
+	ShiftStructure shift_s;
+	char text[9];
+	char key[9];
 	char text_binary[64];
 	char key64_binary[64];
-
 	char key56_binary[56];
 	char key28_left[28];
 	char key28_right[28];
-
-	unsigned int aux_buf;
-
+	int aux_buf;
 	int i = 0, opt = 0;
 
 	char **text_hex, **key64_hex;
@@ -44,13 +52,30 @@ int main()
 	for (i = 0; i < 8; i++)
 		key56_hex[i] = (char *) malloc(sizeof(char) * 2);
 
+	shift_s.shift_n[0] = 1;
+	shift_s.shift_n[1] = 1;
+	shift_s.shift_n[2] = 2;
+	shift_s.shift_n[3] = 2;
+	shift_s.shift_n[4] = 2;
+	shift_s.shift_n[5] = 2;
+	shift_s.shift_n[6] = 2;
+	shift_s.shift_n[7] = 2;
+	shift_s.shift_n[8] = 1;
+	shift_s.shift_n[9] = 2;
+	shift_s.shift_n[10] = 2;
+	shift_s.shift_n[11] = 2;
+	shift_s.shift_n[12] = 2;
+	shift_s.shift_n[13] = 2;
+	shift_s.shift_n[14] = 2;
+	shift_s.shift_n[15] = 1;
 
 	printf("Type of input:\n\t1 - ASCII\n\t2 - Decimal\n\t3 - Hex\n> ");
 	scanf("%d", &opt);
 
-
 	if(opt == 1)
 	{
+		getchar(); //get /n ** GAMBIARRA ALERT **
+
 		printf("Text to cipher (8 chars) > ");
 		scanf("%s", text);
 
@@ -69,7 +94,6 @@ int main()
 			if (i >= 8)
 				break;
 		}
-		text[i]='\0';
 
 		printf("Key (8 integer values) > ");
 		i = 0;
@@ -81,7 +105,6 @@ int main()
 			if (i >= 8)
 				break;
 		}
-		key[i]='\0';
 	} 
 	else
 	{
@@ -95,7 +118,6 @@ int main()
 			if (i >= 8)
 				break;
 		}
-		text[i]='\0';
 		i = 0;
 		printf("Key (16 hex) > ");
 		while(1)
@@ -106,27 +128,81 @@ int main()
 			if (i >= 8)
 				break;
 		}
-		key[i]='\0';
+		
 	}
-	
+	text[8]='\0';
+	key[8]='\0';
+	printf("-------------------------------------------\n\n");
+
+	printf("PLAIN TEXT: \"%s\"\n", text);
+
 	str_to_hex(text, text_hex); //get text_hex from text
 	hex_to_binary(text_hex, text_binary); //get text_binary
 
-	str_to_hex(key, key64_hex); //get key64_hex
-	hex_to_binary(key64_hex, key64_binary); //get key64
+	//print plain text HEX
+	for (i = 0; i < 8; i++)
+	{
+		printf("%c", text_hex[i][0]);
+		printf("%c ", text_hex[i][1]);
+	}
+	printf("\n\n");
 
 	ip(text_binary); //initial permutation
 	binary_to_hex(text_binary, text_hex, 64); //get permuted hex
 
+	printf("IP\n");
+	//print ip HEX
+	for (i = 0; i < 8; i++)
+	{
+		printf("%c", text_hex[i][0]);
+		printf("%c ", text_hex[i][1]);
+	}
+	printf("\n\n");
+
+
+	str_to_hex(key, key64_hex); //get key64_hex
+	hex_to_binary(key64_hex, key64_binary); //get key64
+
+	printf("KEY: \"%s\"\n", key);
+	//Print key hex
+	for (i = 0; i < 8; i++)
+	{
+		printf("%c", key64_hex[i][0]);
+		printf("%c ", key64_hex[i][1]);
+	}
+	printf("\n\n");
+
 	pc1(key64_binary, key56_binary); //get key56
 	binary_to_hex(key56_binary, key56_hex, 56); //get permuted hex
 
-
+	printf("PC1 - SELECT KEY\n");
+	//Print PC1 hex
 	for (i = 0; i < 7; i++)
 	{
 		printf("%c", key56_hex[i][0]);
 		printf("%c ", key56_hex[i][1]);
 	}
+	printf("\n\n");
+
+	splitkey(key56_binary, key28_left, key28_right, 56);
+
+	// shift_block(char* block-to-shift, char* reference-block, int shift-size)
+	shift_block(shift_s.round_n[i].l_block, key28_left, shift_s.shift_n[0]);
+	shift_block(shift_s.round_n[i].r_block, key28_right, shift_s.shift_n[0]);
+	for (i = 0; i < 16; i++)
+	{
+	}
+
+	// for (i = 0; i < 28; ++i)
+	// {
+	// 	printf("%c ", key28_left[i]);
+	// }
+	// printf("\n");
+	// for (i = 0; i < 28; ++i)
+	// {
+	// 	printf("%c ", key28_right[i]);
+	// }
+
 
 	// for (i = 0; i < 8 * 8; i++)
 	// {
@@ -356,5 +432,23 @@ void pc1(char *key64, char *key56)
 		
 	for(i = 0; i < 8 * 7; i++)
 		key56[i] = key64[perm_array[i] - 1];
+	
+}
+
+void splitkey(char *key_b, char *key_left, char *key_right, int key_size)
+{
+	int i;
+	for (i = 0; i < key_size; i++)
+	{
+    if (i < key_size / 2)
+    	key_left[i] = key_b[i];
+    else
+    	key_right[i % (key_size / 2)] = key_b[i];
+	}
+}
+
+	// shift_block(char* block-to-shift, char* reference-block, int shift-size)
+void shift_block(char *to_shift, char *reference, int size)
+{
 	
 }
