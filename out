@@ -1,0 +1,245 @@
+Type of input:
+	1 - ASCII
+	2 - Decimal
+	3 - Hex
+> Text to cipher (8 chars) > Key (8 chars) > -------------------------------------------
+
+PLAIN TEXT: "gZig^ZkZ"
+67 5A 69 67 5E 5A 6B 5A 
+
+IP
+FF B2 19 4D 00 4D F6 FB 
+
+KEY: "12345678"
+31 32 33 34 35 36 37 38 
+
+PC1 - SELECT KEY
+00 00 FF F6 67 88 0F 
+
+--- CHAVE DE ROUND 1 ---
+Shift: 00 01 FF EC CF 10 1E 
+PC2: 50 2C AC 57 2A C2 
+50 2C AC 57 2A C2 
+
+--- ROUND 1 ---
+FF B2 19 4D 00 4D F6 FB 
+Expansion: 80 02 5B FA D7 F6 
+Add Key: D0 2E F7 AD FD 34 
+S-Box: 91 5B E8 6A 
+Permutation: 9D D7 44 C2 
+Add Left: 62 65 5D 8F 
+00 4D F6 FB 62 65 5D 8F 
+
+--- CHAVE DE ROUND 2 ---
+Shift: 00 03 FF C9 9E 20 3D 
+PC2: 50 AC A4 50 A3 47 
+50 AC A4 50 A3 47 
+
+--- ROUND 2 ---
+00 4D F6 FB 62 65 5D 8F 
+Expansion: B0 43 0A AF BC 5E 
+Add Key: E0 EF AE FF 1F 19 
+S-Box: 34 7D 3B 90 
+Permutation: B6 21 32 D7 
+Add Left: B6 6C C4 2C 
+62 65 5D 8F B6 6C C4 2C 
+
+--- CHAVE DE ROUND 3 ---
+Shift: 00 0F FF 06 78 80 F6 
+PC2: D0 AC 26 F6 84 8C 
+D0 AC 26 F6 84 8C 
+
+--- ROUND 3 ---
+62 65 5D 8F B6 6C C4 2C 
+Expansion: 5A C3 59 60 81 59 
+Add Key: 8A 6F 7F 96 05 D5 
+S-Box: 1B 2E C9 C6 
+Permutation: 51 5E 70 67 
+Add Left: 33 3B 2D E8 
+B6 6C C4 2C 33 3B 2D E8 
+
+--- CHAVE DE ROUND 4 ---
+Shift: 00 3F FC 09 E2 03 D9 
+PC2: E0 A6 26 48 37 CB 
+E0 A6 26 48 37 CB 
+
+--- ROUND 4 ---
+B6 6C C4 2C 33 3B 2D E8 
+Expansion: 1A 69 F6 95 BF 50 
+Add Key: FA CF D0 DD 88 9B 
+S-Box: 0D C1 9E 4E 
+Permutation: B9 3B 41 38 
+Add Left: 0F 57 85 14 
+33 3B 2D E8 0F 57 85 14 
+
+--- CHAVE DE ROUND 5 ---
+Shift: 00 FF F0 07 88 0F 66 
+PC2: E0 96 26 3E F0 29 
+E0 96 26 3E F0 29 
+
+--- ROUND 5 ---
+33 3B 2D E8 0F 57 85 14 
+Expansion: 05 EA AF C0 A8 A8 
+Add Key: E5 7C 89 FE 58 81 
+S-Box: AA 16 32 41 
+Permutation: 64 F8 1A 80 
+Add Left: 57 C3 37 68 
+0F 57 85 14 57 C3 37 68 
+
+--- CHAVE DE ROUND 6 ---
+Shift: 03 FF C0 0E 20 3D 99 
+PC2: E0 92 72 62 5D 62 
+E0 92 72 62 5D 62 
+
+--- ROUND 6 ---
+0F 57 85 14 57 C3 37 68 
+Expansion: 2A FE 06 9A EB 50 
+Add Key: CA 6C 74 F8 B6 32 
+S-Box: CB 43 EC 56 
+Permutation: D3 DF C0 A8 
+Add Left: DC 88 45 BC 
+57 C3 37 68 DC 88 45 BC 
+
+--- CHAVE DE ROUND 7 ---
+Shift: 0F FF 00 08 80 F6 67 
+PC2: A4 D2 72 8C A9 3A 
+A4 D2 72 8C A9 3A 
+
+--- ROUND 7 ---
+57 C3 37 68 DC 88 45 BC 
+Expansion: 6F 94 50 20 BD F9 
+Add Key: CB 46 22 AC 14 C3 
+S-Box: CC B6 EA 3F 
+Permutation: 1F EE 9D B4 
+Add Left: 48 2D AA DC 
+DC 88 45 BC 48 2D AA DC 
+
+--- CHAVE DE ROUND 8 ---
+Shift: 3F FC 00 02 03 D9 9E 
+PC2: A6 53 52 E5 5E 50 
+A6 53 52 E5 5E 50 
+
+--- ROUND 8 ---
+DC 88 45 BC 48 2D AA DC 
+Expansion: 25 01 5B D5 56 F8 
+Add Key: 83 52 09 30 08 A8 
+S-Box: 47 66 BC 49 
+Permutation: 79 51 D8 9C 
+Add Left: A5 D9 9D 20 
+48 2D AA DC A5 D9 9D 20 
+
+--- CHAVE DE ROUND 9 ---
+Shift: 7F F8 00 04 07 B3 3C 
+PC2: 26 53 53 CB 9A 40 
+26 53 53 CB 9A 40 
+
+--- ROUND 9 ---
+48 2D AA DC A5 D9 9D 20 
+Expansion: 50 BE F3 CF A9 01 
+Add Key: 76 ED A0 04 33 41 
+S-Box: 31 CA EF 11 
+Permutation: 13 65 6B CA 
+Add Left: 5B 48 C1 16 
+A5 D9 9D 20 5B 48 C1 16 
+
+--- CHAVE DE ROUND 10 ---
+Shift: FF E0 00 10 1E CC F1 
+PC2: 2F 51 51 D0 C7 3C 
+2F 51 51 D0 C7 3C 
+
+--- ROUND 10 ---
+A5 D9 9D 20 5B 48 C1 16 
+Expansion: 2F 6A 51 60 28 AC 
+Add Key: 00 3B 00 B0 EF 90 
+S-Box: ED 37 78 2A 
+Permutation: BC CE D6 94 
+Add Left: 19 17 4B B4 
+5B 48 C1 16 19 17 4B B4 
+
+--- CHAVE DE ROUND 11 ---
+Shift: FF 80 00 70 7B 33 C4 
+PC2: 0F 41 D9 19 1E 8C 
+0F 41 D9 19 1E 8C 
+
+--- ROUND 11 ---
+5B 48 C1 16 19 17 4B B4 
+Expansion: 0F 28 AE A5 7D A8 
+Add Key: 00 69 77 BC 63 24 
+S-Box: EE DB DF 84 
+Permutation: F5 ED A3 79 
+Add Left: AE A5 62 6F 
+19 17 4B B4 AE A5 62 6F 
+
+--- CHAVE DE ROUND 12 ---
+Shift: FE 00 01 F1 EC CF 10 
+PC2: 1F 41 99 D8 70 B1 
+1F 41 99 D8 70 B1 
+
+--- ROUND 12 ---
+19 17 4B B4 AE A5 62 6F 
+Expansion: D5 D5 0A B0 43 5F 
+Add Key: CA 94 93 68 33 EE 
+S-Box: C3 D7 0F A2 
+Permutation: D4 E3 F5 09 
+Add Left: CD F4 BE BD 
+AE A5 62 6F CD F4 BE BD 
+
+--- CHAVE DE ROUND 13 ---
+Shift: F8 00 07 F7 B3 3C 40 
+PC2: 1F 09 89 23 6A 2D 
+1F 09 89 23 6A 2D 
+
+--- ROUND 13 ---
+AE A5 62 6F CD F4 BE BD 
+Expansion: E5 BF A9 5F D5 FB 
+Add Key: FA B6 20 7C BF D6 
+S-Box: 0F BA 6C CE 
+Permutation: 5C 5E 41 FD 
+Add Left: F2 FB 23 92 
+CD F4 BE BD F2 FB 23 92 
+
+--- CHAVE DE ROUND 14 ---
+Shift: E0 00 1F FE CC F1 01 
+PC2: 1B 28 8D B2 39 92 
+1B 28 8D B2 39 92 
+
+--- ROUND 14 ---
+CD F4 BE BD F2 FB 23 92 
+Expansion: 7A 57 F6 90 7C A5 
+Add Key: 61 7F 7B 22 45 37 
+S-Box: 5A 27 7F 90 
+Permutation: F2 6C B0 8F 
+Add Left: 3F 98 0E 32 
+F2 FB 23 92 3F 98 0E 32 
+
+--- CHAVE DE ROUND 15 ---
+Shift: 80 00 7F FB 33 C4 07 
+PC2: 19 2C 8C A5 03 37 
+19 2C 8C A5 03 37 
+
+--- ROUND 15 ---
+F2 FB 23 92 3F 98 0E 32 
+Expansion: 1F FC F0 05 C1 A4 
+Add Key: 06 D0 7C A0 C2 93 
+S-Box: 04 D8 A6 05 
+Permutation: 05 21 09 F8 
+Add Left: F7 DA 2A 6A 
+3F 98 0E 32 F7 DA 2A 6A 
+
+--- CHAVE DE ROUND 16 ---
+Shift: 00 00 FF F6 67 88 0F 
+PC2: 51 2C 8C A7 43 C0 
+51 2C 8C A7 43 C0 
+
+--- ROUND 16 ---
+3F 98 0E 32 F7 DA 2A 6A 
+Expansion: 7A FE F4 15 43 55 
+Add Key: 2B D2 78 B2 00 95 
+S-Box: FE 35 79 B6 
+Permutation: F6 8E B6 B7 
+Add Left: C9 16 B8 85 
+F7 DA 2A 6A C9 16 B8 85 
+
+Swap: C9 16 B8 85 F7 DA 2A 6A 
+
+Inverse IP: C1 BA 91 6E B4 8E E2 E5 

@@ -2,52 +2,54 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-void inverse_ip(char *);
-void str_to_hex(char *, char **);
-void hex_to_binary(char **, char *, int);
-void binary_to_hex(char *, char **, int);
-
+/* DES Algorithm Operations */
 void ip(char *);
+void inverse_ip(char *);
 void pc1(char *, char *);
 void pc2(char *, char *);
 void expansion(char *text32, char *text48);
-void xor(char *k, char *t, char *r, int s);
-void s1(char *b6, char *b4);
-void s2(char *b6, char *b4);
-void s3(char *b6, char *b4);
-void s4(char *b6, char *b4);
-void s5(char *b6, char *b4);
-void s6(char *b6, char *b4);
-void s7(char *b6, char *b4);
-void s8(char *b6, char *b4);
 void p(char *t32);
 
-void join_sr(char *, char *, char *, char *, char *, char *, char *, char *, char *);
-char get_hex_single(char *);
+/* SBOXES */
+void s1(char *, char *); 		void s2(char *, char *);
+void s3(char *, char *); 		void s4(char *, char *);
+void s5(char *, char *); 		void s6(char *, char *);
+void s7(char *, char *); 		void s8(char *, char *);
+
+/* Helper Functions*/
+void  join_sr(char *, char *, char *, char *, char *, char *, char *, char *, char *);
+int   binary_to_int(char *);
+char* int_to_binary(int);
+void  str_to_hex(char *, char **);
+void hex_to_binary(char **, char *, int);
+void binary_to_hex(char *, char **, int);
 char* get_half_byte(char );
-void split(char *, char *, char *, int);
-void join(char *, char *, char *, int);
-void shift_block(char *, char *, int);
-int binary_to_int(char *b);
-char* int_to_binary(int n);
+char  get_hex_single(char *);
+void  printh(char **, int);
+
+/* Operations Functions*/
+void  split(char *, char *, char *, int);
+void  join(char *, char *, char *, int);
+void  shift_block(char *, char *, int);
+void  swap(char *, char *, int);
+void xor(char *k, char *t, char *r, int s);
 
 struct ShiftStep {
 	char l_block[28];
 	char r_block[28];
 };
 
+/* structure that will represent all the 16 shift steps */
 typedef struct {
 	struct ShiftStep round_n[16];
-	int shift_n[16];
+	int shift_n[16]; // can be 1 or 2
 } ShiftStructure;
 
 int main()
 {
 	ShiftStructure shift_s;
 	char text[9];
-	char key[9];
-	char text_binary[64];
+	char text64_binary[64];
 	char text32_left[32];
 	char text32_right[32];
 	char text48_binary[48];
@@ -63,6 +65,7 @@ int main()
 	char sp7[7];	char sr7[4];
 	char sp8[7];	char sr8[4];
 	
+	char key[9];
 	char key64_binary[64];
 	char key56_binary[56];
 	char key48_binary[56];
@@ -71,6 +74,7 @@ int main()
 
 	int aux_buf;
 	int i = 0, opt = 0, j = 0;
+
 	char **text_hex, **text48_hex, **text32_hex, 
 			 **key64_hex, **key56_hex, **key48_hex;
 
@@ -96,11 +100,11 @@ int main()
 	for (i = 0; i < 4; i++)
 		text32_hex[i] = (char *) malloc(sizeof(char) * 2);
 
-	shift_s.shift_n[0] = 1; 		shift_s.shift_n[1] = 1;
-	shift_s.shift_n[2] = 2; 		shift_s.shift_n[3] = 2;
-	shift_s.shift_n[4] = 2;			shift_s.shift_n[5] = 2;
-	shift_s.shift_n[6] = 2;			shift_s.shift_n[7] = 2;
-	shift_s.shift_n[8] = 1;			shift_s.shift_n[9] = 2;
+	shift_s.shift_n[0]  = 1; 		shift_s.shift_n[1]  = 1;
+	shift_s.shift_n[2]  = 2; 		shift_s.shift_n[3]  = 2;
+	shift_s.shift_n[4]  = 2;		shift_s.shift_n[5]  = 2;
+	shift_s.shift_n[6]  = 2;		shift_s.shift_n[7]  = 2;
+	shift_s.shift_n[8]  = 1;		shift_s.shift_n[9]  = 2;
 	shift_s.shift_n[10] = 2;		shift_s.shift_n[11] = 2;
 	shift_s.shift_n[12] = 2;		shift_s.shift_n[13] = 2;
 	shift_s.shift_n[14] = 2;		shift_s.shift_n[15] = 1;
@@ -108,17 +112,15 @@ int main()
 	printf("Type of input:\n\t1 - ASCII\n\t2 - Decimal\n\t3 - Hex\n> ");
 	scanf("%d", &opt);
 
-	if(opt == 1)
+	if(opt == 1) // ASCII String
 	{
-		getchar(); //get /n ** GAMBIARRA ALERT **
-
 		printf("Text to cipher (8 chars) > ");
 		scanf("%s", text);
 
 		printf("Key (8 chars) > ");
 		scanf("%s", key);
 	} 
-	else if (opt == 2)
+	else if (opt == 2) // INT
 	{
 		i = 0;
 		printf("Text to cipher (8 integer values) > ");
@@ -142,7 +144,7 @@ int main()
 				break;
 		}
 	} 
-	else
+	else // HEX
 	{
 		i = 0;
 		printf("Text to cipher (16 hex) > ");
@@ -166,62 +168,44 @@ int main()
 		}
 		
 	}
-	text[8]='\0';
+	// setting end to inputs
+	text[8]='\0'; 
 	key[8]='\0';
 	printf("-------------------------------------------\n\n");
 
 	printf("PLAIN TEXT: \"%s\"\n", text);
 
 	str_to_hex(text, text_hex); //get text_hex from text
-	hex_to_binary(text_hex, text_binary, 64); //get text_binary
+	hex_to_binary(text_hex, text64_binary, 64); //get text64_binary
 
-	//print plain text HEX
-	for (i = 0; i < 8; i++)
-	{
-		printf("%c", text_hex[i][0]);
-		printf("%c ", text_hex[i][1]);
-	}
+	printh(text_hex, 8);
 	printf("\n\n");
 
-	ip(text_binary); //initial permutation
-	binary_to_hex(text_binary, text_hex, 64); //get permuted hex
+	ip(text64_binary); //initial permutation
+	binary_to_hex(text64_binary, text_hex, 64); //get permuted hex
 
+	//print ip hexadecimal
 	printf("IP\n");
-	//print ip HEX
-	for (i = 0; i < 8; i++)
-	{
-		printf("%c", text_hex[i][0]);
-		printf("%c ", text_hex[i][1]);
-	}
-	printf("\n\n");
+	printh(text_hex, 8);
 
 	str_to_hex(key, key64_hex); //get key64_hex
-	hex_to_binary(key64_hex, key64_binary, 64); //get key64
+	hex_to_binary(key64_hex, key64_binary, 64); //get key64_binary
 
-	printf("KEY: \"%s\"\n", key);
-	//Print key hex
-	for (i = 0; i < 8; i++)
-	{
-		printf("%c", key64_hex[i][0]);
-		printf("%c ", key64_hex[i][1]);
-	}
+	printf("\n\nKEY: \"%s\"\n", key);
+	printh(key64_hex, 8);
 	printf("\n\n");
 
 	pc1(key64_binary, key56_binary); //get key56 binary from pc1
 	binary_to_hex(key56_binary, key56_hex, 56); //get permuted hex
 
 	printf("PC1 - SELECT KEY\n");
-	//Print PC1 hex
-	for (i = 0; i < 7; i++)
-	{
-		printf("%c", key56_hex[i][0]);
-		printf("%c ", key56_hex[i][1]);
-	}
+	printh(key56_hex, 7);
 	printf("\n\n");
 
-	split(key56_binary, key28_left, key28_right, 56);
+	// Split key into right & left
+	split(key56_binary, key28_left, key28_right, 56); 
 
-	// shift_block(char* block-to-shift, char* reference-block, int shift-size)
+	// Set shifted blocks regarding the key
 	shift_block(shift_s.round_n[0].l_block, key28_left, shift_s.shift_n[0]);
 	shift_block(shift_s.round_n[0].r_block, key28_right, shift_s.shift_n[0]);
 	for (i = 1; i < 16; i++)
@@ -230,76 +214,54 @@ int main()
 		shift_block(shift_s.round_n[i].r_block, shift_s.round_n[i-1].r_block, shift_s.shift_n[i]);
 	}
 
-	for (j = 0; j < 1; j++)
-	{
+	// Split text binary
+	split(text64_binary, text32_left, text32_right, 64);
 
-	  // join(char *key1, char *key2, char *result_key, int key_size);
+	// Begin Rounds Loop
+	for (j = 0; j < 16; j++)
+	{
 		join(shift_s.round_n[j].l_block, shift_s.round_n[j].r_block, key56_binary, 56);
+		
 		binary_to_hex(key56_binary, key56_hex, 56); //get shifted hex
 
-		printf("CHAVE DE ROUND %d\n", j);
+		printf("--- CHAVE DE ROUND %d ---\n", j+1);
 		printf("Shift: ");
-		for (i = 0; i < 7; i++)
-		{
-			printf("%c", key56_hex[i][0]);
-			printf("%c ", key56_hex[i][1]);
-		}
-		printf("\n");
+		printh(key56_hex, 7);
 
 		hex_to_binary(key56_hex, key56_binary, 56); //get key56 binary
 
 		pc2(key56_binary, key48_binary);
 		binary_to_hex(key48_binary, key48_hex, 48); //get permuted hex
 
-		printf("PC2: ");
-		//Print PC1 hex
-		for (i = 0; i < 6; i++)
-		{
-			printf("%c", key48_hex[i][0]);
-			printf("%c ", key48_hex[i][1]);
-		}
+		printf("\nPC2: ");
+		//Print PC2 hex
+		printh(key48_hex, 6);
 		printf("\n");
-		for (i = 0; i < 6; i++)
-		{
-			printf("%c", key48_hex[i][0]);
-			printf("%c ", key48_hex[i][1]);
-		}
-		printf("\n");
-		printf("\n");
-		printf("ROUND %d\n", j);
-		//print cipher HEX
-		for (i = 0; i < 8; i++)
-		{
-			printf("%c", text_hex[i][0]);
-			printf("%c ", text_hex[i][1]);
-		}
+		printh(key48_hex, 6);
+		printf("\n\n");
 
-		split(text_binary, text32_left, text32_right, 64);
+		printf("--- ROUND %d ---\n", j+1);
+
+		// Getting cipher text to print
+		join(text32_left, text32_right, text64_binary, 64);
+		binary_to_hex(text64_binary, text_hex, 64);
+		printh(text_hex, 8);
+
+		// expand right key
 		expansion(text32_right, text48_binary);
-		binary_to_hex(text48_binary, text48_hex, 48); //get expanded hex
-
+		binary_to_hex(text48_binary, text48_hex, 48); //get expanded hex for printing
+		// print expanded key
+		printf("\nExpansion: ");
+		printh(text48_hex, 6);
 		printf("\n");
-		printf("Expansion: ");
-		//print cipher HEX
-		for (i = 0; i < 6; i++)
-		{
-			printf("%c", text48_hex[i][0]);
-			printf("%c ", text48_hex[i][1]);
-		}
 
 		xor(key48_binary, text48_binary, t_xor_round, 48);
 		binary_to_hex(t_xor_round, text48_hex, 48); //get expanded hex
-		printf("\n");
 		printf("Add Key: ");
 		//print cipher HEX
-		for (i = 0; i < 6; i++)
-		{
-			printf("%c", text48_hex[i][0]);
-			printf("%c ", text48_hex[i][1]);
-		}
+		printh(text48_hex, 6);
 
 		// sbox on t_xor_round
-
 		strncpy(sp1, &t_xor_round[0],  6);
 		sp1[6] = '\0';
 		strncpy(sp2, &t_xor_round[6],  6);
@@ -326,266 +288,76 @@ int main()
 		s7(sp7, sr7);
 		s8(sp8, sr8);
 
+		// join all the sbox partials and put them on text32_r_f
 		join_sr(sr1, sr2, sr3, sr4, sr5, sr6, sr7, sr8, text32_r_f);
 		binary_to_hex(text32_r_f, text32_hex, 32);
 
-		printf("\n");
-		printf("S-Box: ");
-		for (i = 0; i < 4; i++)
-		{
-			printf("%c", text32_hex[i][0]);
-			printf("%c ", text32_hex[i][1]);
-		}
+		printf("\nS-Box: ");
+		printh(text32_hex, 4);
 
+		// inner permutation on the sbox result
 		p(text32_r_f);
 		binary_to_hex(text32_r_f, text32_hex, 32);
 
-		printf("\n");
-		printf("Permutation: ");
-		for (i = 0; i < 4; i++)
-		{
-			printf("%c", text32_hex[i][0]);
-			printf("%c ", text32_hex[i][1]);
-		}
+		printf("\nPermutation: ");
+		printh(text32_hex, 4);
 
+		// adding (XOT) left to right  
 		xor(text32_left, text32_r_f, text32_r_f, 48);
 		binary_to_hex(text32_r_f, text32_hex, 32);
 		
+		printf("\nAdd Left: ");
+		printh(text32_hex, 4);
 		printf("\n");
-		printf("Add Left: ");
-		for (i = 0; i < 4; i++)
+
+		// Ln = Rn-1 && Lr = f(Lr-1) XOR Ln-1
+		for (i = 0; i < 32; i++)
 		{
-			printf("%c", text32_hex[i][0]);
-			printf("%c ", text32_hex[i][1]);
+			text32_left[i] = text32_right[i];
+			text32_right[i] = text32_r_f[i];
 		}
 
-		printf("\n");
+		//converting right & left for printing
+		binary_to_hex(text32_left, text32_hex, 32);
+		printh(text32_hex, 4);
+		
 		binary_to_hex(text32_right, text32_hex, 32);
-		for (i = 0; i < 4; i++)
-		{
-			printf("%c", text32_hex[i][0]);
-			printf("%c ", text32_hex[i][1]);
-		}
-		binary_to_hex(text32_r_f, text32_hex, 32);
-		for (i = 0; i < 4; i++)
-		{
-			printf("%c", text32_hex[i][0]);
-			printf("%c ", text32_hex[i][1]);
-		}
-		printf("\n");
-
-		for (i = 0; i < 64; i++)
-		{
-			if (i < 32)
-				text_binary[i] = text32_right[i];
-			else
-				text_binary[i] = text32_r_f[i-32];
-		}
-
+		printh(text32_hex, 4);
+		
+		printf("\n\n");
 	}
 	
-	// for (i = 0; i < 28; ++i)
-	// {
-	// 	printf("%c ", key28_left[i]);
-	// }
-	// printf("\n");
-	// for (i = 0; i < 28; ++i)
-	// {
-	// 	printf("%c ", key28_right[i]);
-	// }
-	// printf("\n");
+	// After round loop is finished
 
-
-	// for (i = 0; i < 28; ++i)
-	// {
-	// 	printf("%c ", shift_s.round_n[0].l_block[i]);
-	// }
-	// printf("\n");
-	// for (i = 0; i < 28; ++i)
-	// {
-	// 	printf("%c ", shift_s.round_n[0].r_block[i]);
-	// }
-
-	// for (i = 0; i < 8 * 8; i++)
-	// {
-	// 	// if (i % 4 == 0 && i!=0)
-	// 	// 	printf(" ");
-	// 	if (i % 8 == 0 && i!=0)
-	// 		printf(" ");
-	// 	printf("%c ", key64_binary[i]);
-	// }
-	// printf("\n");
-	// for (i = 0; i < 8 * 7; i++)
-	// {
-	// 	// if (i % 4 == 0 && i!=0)
-	// 	// 	printf(" ");
-	// 	if (i % 8 == 0 && i!=0)
-	// 		printf(" ");
-	// 	printf("%c ", key56_binary[i]);
-	// }
-	printf("\n");
+	// Swap left & right
+	swap(text32_left, text32_right, 32);
+	printf("Swap: ");
+	// convert to hex for printing
+	binary_to_hex(text32_left, text32_hex, 32);
+	printh(text32_hex, 4);
+	binary_to_hex(text32_right, text32_hex, 32);
+	printh(text32_hex, 4);
+	printf("\n\n");
 	
+	// join both sides & apply inverse_ip
+	join(text32_left, text32_right, text64_binary, 64);
+	inverse_ip(text64_binary);
+
+	printf("Inverse IP: ");
+	binary_to_hex(text64_binary, text_hex, 64);
+	printh(text_hex, 8);
+
+	printf("\n");
 
 	return 0;
 }
 
-void str_to_hex(char *str, char **hex)
+/* ----------- DES FUNCTIONS ----------- */
+
 /*
-	hex format:
-	hex[letter][hex chars];
-
-	the letter column will have 8 indexes, as the "hex chars"
-	on will have 2: one for each hex character of the pair
+	#ip
+	DES initial permutation
 */
-{
-	int i;
-	
-	for (i = 0; i < 8; i++)
-	{
-		sprintf(hex[i], "%02X", str[i]);
-	}
-}
-
-void hex_to_binary(char **hex, char *b, int n_bits)
-/*
-	binary format
-	binary[64];
-
-	the binary array will have 64 bits
-*/
-{
-	int i;
-	char half_byte[4];
-
-	for (i = 0; i < n_bits / 8; i++)
-	{
-		strcpy(half_byte, get_half_byte(hex[i][0]));
-		b[(i * 8)] 		= half_byte[0];
-		b[(i * 8) + 1] = half_byte[1];
-		b[(i * 8) + 2] = half_byte[2];
-		b[(i * 8) + 3] = half_byte[3];
-
-		strcpy(half_byte, get_half_byte(hex[i][1]));
-		b[(i * 8) + 4] = half_byte[0];
-		b[(i * 8) + 5] = half_byte[1];
-		b[(i * 8) + 6] = half_byte[2];
-		b[(i * 8) + 7] = half_byte[3];
-	}
-}
-
-void binary_to_hex(char *b, char **hex, int n_bits)
-{
-	char h;
-	char half_byte[4];
-	int i;
-
-
-	for (i = 0; i < n_bits; i = i+8)
-	{
-		half_byte[0] = b[i];
-		half_byte[1] = b[i + 1]; 
-		half_byte[2] = b[i + 2]; 
-		half_byte[3] = b[i + 3]; 
-		h = get_hex_single(half_byte);
-		// printf("%c", h);
-		hex[i/8][0] = h;
-		half_byte[0] = b[i + 4];
-		half_byte[1] = b[i + 5]; 
-		half_byte[2] = b[i + 6]; 
-		half_byte[3] = b[i + 7]; 
-		h = get_hex_single(half_byte);
-		// printf("%c ", h);
-		hex[i/8][1] = h;
-	}
-}
-
-char* get_half_byte(char hex)
-/*
-	function that, given a hex char, returns 4 bits
-	corresponding the hex value of the char passed
-*/
-{
-	switch(hex)
-	{
-		case '0':
-			return "0000";
-		case '1':
-			return "0001";
-		case '2':
-			return "0010";
-		case '3':
-			return "0011";
-		case '4':
-			return "0100";
-		case '5':
-			return "0101";
-		case '6':
-			return "0110";
-		case '7':
-			return "0111";
-		case '8':
-			return "1000";
-		case '9':
-			return "1001";
-		case 'A':
-			return "1010";
-		case 'B':
-			return "1011";
-		case 'C':
-			return "1100";
-		case 'D':
-			return "1101";
-		case 'E':
-			return "1110";
-		case 'F':
-			return "1111";
-		default:
-			return "0000";
-	}
-}
-
-char get_hex_single(char *half_byte)
-/*
-	function that, given 4 bits, returns the hex char
-	corresponding to the bits informed
-*/
-{
-	if(strcmp(half_byte, "0000") == 0)
-		return '0';
-	else if(strcmp(half_byte, "0001") == 0)
-		return '1';
-	else if(strcmp(half_byte, "0010") == 0)
-		return '2';
-	else if(strcmp(half_byte, "0011") == 0)
-		return '3';
-	else if(strcmp(half_byte, "0100") == 0)
-		return '4';
-	else if(strcmp(half_byte, "0101") == 0)
-		return '5';
-	else if(strcmp(half_byte, "0110") == 0)
-		return '6';
-	else if(strcmp(half_byte, "0111") == 0)
-		return '7';
-	else if(strcmp(half_byte, "1000") == 0)
-		return '8';
-	else if(strcmp(half_byte, "1001") == 0)
-		return '9';
-	else if(strcmp(half_byte, "1010") == 0)
-		return 'A';
-	else if(strcmp(half_byte, "1011") == 0)
-		return 'B';
-	else if(strcmp(half_byte, "1100") == 0)
-		return 'C';
-	else if(strcmp(half_byte, "1101") == 0)
-		return 'D';
-	else if(strcmp(half_byte, "1110") == 0)
-		return 'E';
-	else if(strcmp(half_byte, "1111") == 0)
-		return 'F';
-	else
-		return ' ';
-}
-
 void ip(char *array)
 {
 	int i;
@@ -600,18 +372,21 @@ void ip(char *array)
 		63, 55, 47, 39, 31, 23, 15, 7
 	};
 
-	char a_cpy[8 * 8];
-	for (i = 0; i < 8 * 8; i++)
+	char a_cpy[64];
+	for (i = 0; i < 64; i++)
 		a_cpy[i] = array[i];
 		
-	for(i = 0; i < 8 * 8; i++)
-	{
+	for(i = 0; i < 64; i++)
 		array[i] = a_cpy[p[i] - 1];
-	}
 }
 
+/*
+	#inverse_ip
+	DES final permutation
+*/
 void inverse_ip(char *array)
 {
+	int i;
 	int p[] = {
 		40, 8, 48, 16, 56, 24, 64, 32,
 	  39, 7, 47, 15, 55, 23, 63, 31, 
@@ -622,8 +397,19 @@ void inverse_ip(char *array)
 		34, 2, 42, 10, 50, 18, 58, 26, 
 		33, 1, 41,  9, 49, 17, 57, 25
 	};
+
+	char a_cpy[64];
+	for (i = 0; i < 64; i++)
+		a_cpy[i] = array[i];
+		
+	for(i = 0; i < 64; i++)
+		array[i] = a_cpy[p[i] - 1];
 }
 
+/*
+	#pc1
+	DES PC1
+*/
 void pc1(char *key64, char *key56)
 {
 	int i;
@@ -640,9 +426,12 @@ void pc1(char *key64, char *key56)
 		
 	for(i = 0; i < 8 * 7; i++)
 		key56[i] = key64[p[i] - 1];
-	
 }
 
+/*
+	#pc2
+	DES PC2
+*/
 void pc2(char *key56, char *key48)
 {
 	int i;
@@ -661,6 +450,10 @@ void pc2(char *key56, char *key48)
 		key48[i] = key56[p[i] - 1];
 }
 
+/*
+	#expansion
+	DES Expansion (function e)
+*/
 void expansion(char *text32, char *text48)
 {
 	int i;
@@ -679,63 +472,12 @@ void expansion(char *text32, char *text48)
 		text48[i] = text32[p[i] - 1];
 }
 
-void split(char *b, char *bl, char *br, int s)
-{
-	int i;
-	for (i = 0; i < s; i++)
-	{
-    if (i < s / 2)
-    	bl[i] = b[i];
-    else
-    	br[i % (s / 2)] = b[i];
-	}
-}
-
-	// shift_block(char* block-to-shift, char* reference-block, int shift-size)
-void shift_block(char *s, char *r, int n_shift)
-{
-	char of;
-	int i;
-
-	for (i = 0; i < 28; i++)
-		s[i] = r[i];
-
-	while (n_shift > 0)
-	{
-		of = s[0];
-		
-		for (i = 1; i < 28; i++)
-			s[i-1] = s[i];
-		s[27] = of;
-
-		n_shift--;
-	}
-}
-
-void join(char *b1, char *b2, char *rb, int s)
-{
-	int i;
-  for (i = 0; i < s; i++)
-  {
-  	if (i < s / 2)
-  		rb[i] = b1[i];
-  	else 
-  		rb[i] = b2[i - (s / 2)];
-  }
-}
-
-void xor(char *k, char *t, char *r, int s)
-{
-	int i;
-	for (i = 0; i < s; i++)
-	{
-		if(t[i] == k[i])
-			r[i] = '0';
-		else
-			r[i] = '1';
-	}
-}
-
+/* -------------- S-BOXES -------------- */
+/*
+	#sn
+	sbox n for the relative 6 bits partial
+	returns 4 bits partial 
+*/
 void s1(char *b6, char *b4) 
 {
 	int i, row, column;
@@ -956,6 +698,13 @@ void p(char *t32)
 		t32[i] = aux[p[i] - 1];
 	
 }
+
+/* --------- HELPER FUNCTIONS ---------- */
+
+/*
+	#join_sr
+	joim sboxes' partials and concatenate them on "r"
+*/
 void join_sr(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7, char *s8, char *r)
 {
 	r[0] = '\0';
@@ -1050,5 +799,274 @@ char* int_to_binary(int n)
 			return "1110";
 		case 15:
 			return "1111";
+	}
+}
+
+/*
+	#str_to_hex
+	hex format: hex[letter][hex chars];
+
+	the letter column will have 8 indexes, as the "hex chars"
+	on will have 2: one for each hex character of the pair
+*/
+void str_to_hex(char *str, char **hex)
+{
+	int i;
+	
+	for (i = 0; i < 8; i++)
+	{
+		sprintf(hex[i], "%02X", str[i]);
+	}
+}
+
+/*
+  #hex_to_binary
+	binary format: binary[64];
+
+	the binary array will have 64 bits
+*/
+void hex_to_binary(char **hex, char *b, int n_bits)
+{
+	int i;
+	char half_byte[4];
+
+	for (i = 0; i < n_bits / 8; i++)
+	{
+		strcpy(half_byte, get_half_byte(hex[i][0]));
+		b[(i * 8)] 		= half_byte[0];
+		b[(i * 8) + 1] = half_byte[1];
+		b[(i * 8) + 2] = half_byte[2];
+		b[(i * 8) + 3] = half_byte[3];
+
+		strcpy(half_byte, get_half_byte(hex[i][1]));
+		b[(i * 8) + 4] = half_byte[0];
+		b[(i * 8) + 5] = half_byte[1];
+		b[(i * 8) + 6] = half_byte[2];
+		b[(i * 8) + 7] = half_byte[3];
+	}
+}
+
+/*
+	#binary_to_hex
+	get hex string from bitset of n_bits size
+*/
+void binary_to_hex(char *b, char **hex, int n_bits)
+{
+	char h;
+	char half_byte[4];
+	int i;
+
+
+	for (i = 0; i < n_bits; i = i+8)
+	{
+		half_byte[0] = b[i];
+		half_byte[1] = b[i + 1]; 
+		half_byte[2] = b[i + 2]; 
+		half_byte[3] = b[i + 3]; 
+		h = get_hex_single(half_byte);
+		// printf("%c", h);
+		hex[i/8][0] = h;
+		half_byte[0] = b[i + 4];
+		half_byte[1] = b[i + 5]; 
+		half_byte[2] = b[i + 6]; 
+		half_byte[3] = b[i + 7]; 
+		h = get_hex_single(half_byte);
+		// printf("%c ", h);
+		hex[i/8][1] = h;
+	}
+}
+
+/*
+	#get_half_byte
+	function that, given a hex char, returns 4 bits
+	corresponding the hex value of the char passed
+*/
+char* get_half_byte(char hex)
+{
+	switch(hex)
+	{
+		case '0':
+			return "0000";
+		case '1':
+			return "0001";
+		case '2':
+			return "0010";
+		case '3':
+			return "0011";
+		case '4':
+			return "0100";
+		case '5':
+			return "0101";
+		case '6':
+			return "0110";
+		case '7':
+			return "0111";
+		case '8':
+			return "1000";
+		case '9':
+			return "1001";
+		case 'A':
+			return "1010";
+		case 'B':
+			return "1011";
+		case 'C':
+			return "1100";
+		case 'D':
+			return "1101";
+		case 'E':
+			return "1110";
+		case 'F':
+			return "1111";
+		default:
+			return "0000";
+	}
+}
+
+/*
+	#get_hex_single
+	function that, given 4 bits, returns the hex char
+	corresponding to the bits informed
+*/
+char get_hex_single(char *half_byte)
+{
+	if(strcmp(half_byte, "0000") == 0)
+		return '0';
+	else if(strcmp(half_byte, "0001") == 0)
+		return '1';
+	else if(strcmp(half_byte, "0010") == 0)
+		return '2';
+	else if(strcmp(half_byte, "0011") == 0)
+		return '3';
+	else if(strcmp(half_byte, "0100") == 0)
+		return '4';
+	else if(strcmp(half_byte, "0101") == 0)
+		return '5';
+	else if(strcmp(half_byte, "0110") == 0)
+		return '6';
+	else if(strcmp(half_byte, "0111") == 0)
+		return '7';
+	else if(strcmp(half_byte, "1000") == 0)
+		return '8';
+	else if(strcmp(half_byte, "1001") == 0)
+		return '9';
+	else if(strcmp(half_byte, "1010") == 0)
+		return 'A';
+	else if(strcmp(half_byte, "1011") == 0)
+		return 'B';
+	else if(strcmp(half_byte, "1100") == 0)
+		return 'C';
+	else if(strcmp(half_byte, "1101") == 0)
+		return 'D';
+	else if(strcmp(half_byte, "1110") == 0)
+		return 'E';
+	else if(strcmp(half_byte, "1111") == 0)
+		return 'F';
+	else
+		return ' ';
+}
+
+/*
+	#printh
+	hex format: hex[letter][hex chars];
+
+	function to print a hex value of "s" pairs
+*/
+void printh(char **h, int s)
+{
+	int i;
+	for (i = 0; i < s; i++)
+		printf("%c%c ", h[i][0], h[i][1]);
+}
+
+/* -------- OPERATION FUNCTIONS -------- */
+
+/*
+	#split
+	split a bitset of size s into 2 pieces, bl & br
+*/
+void split(char *b, char *bl, char *br, int s)
+{
+	int i;
+	for (i = 0; i < s; i++)
+	{
+    if (i < s / 2)
+    	bl[i] = b[i];
+    else
+    	br[i % (s / 2)] = b[i];
+	}
+}
+
+/*
+	#shift_block
+	left shift a "r" block "n_shift" times. The "r"
+	bitset is the shifted one
+*/
+void shift_block(char *s, char *r, int n_shift)
+{
+	char of;
+	int i;
+
+	for (i = 0; i < 28; i++)
+		s[i] = r[i];
+
+	while (n_shift > 0)
+	{
+		of = s[0];
+		
+		for (i = 1; i < 28; i++)
+			s[i-1] = s[i];
+		s[27] = of;
+
+		n_shift--;
+	}
+}
+
+/*
+  #join
+  join two bitset into one of size "s"
+  the result is in "rb"
+*/
+void join(char *b1, char *b2, char *rb, int s)
+{
+	int i;
+  for (i = 0; i < s; i++)
+  {
+  	if (i < s / 2)
+  		rb[i] = b1[i];
+  	else 
+  		rb[i] = b2[i - (s / 2)];
+  }
+}
+
+/*
+  #xor
+  xor operation of two bitset of size "s"
+  the result is in "r"
+*/
+void xor(char *k, char *t, char *r, int s)
+{
+	int i;
+	for (i = 0; i < s; i++)
+	{
+		if(t[i] == k[i])
+			r[i] = '0';
+		else
+			r[i] = '1';
+	}
+}
+
+/*
+	#swap
+	simply swap two bitset of site "s"
+*/
+void swap(char *l, char *r, int s)
+{
+	int i;
+	char a;
+	for (i = 0; i < s; i++)
+	{
+		a = l[i];
+		l[i] = r[i];
+		r[i] = a;
 	}
 }
